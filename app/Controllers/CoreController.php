@@ -172,6 +172,8 @@ abstract class CoreController
             'user-list' => ['admin'],
             'user-add' => ['admin'],
             'user-add-post' => ['admin'],
+            'user-update' => ['admin'],
+            'user-update-post' => ['admin'],
             'user-delete' => ['admin']
         ];
 
@@ -184,7 +186,6 @@ abstract class CoreController
             // Puis on utilise la méthode checkAuthorization pour vérifier...
             $this->checkAuthorization($authorizedRolesList);
         }
-        // Sinon ba... on ne fait rien ! La route est libre :)
     }
 
     public function checkCSRF($routeName)

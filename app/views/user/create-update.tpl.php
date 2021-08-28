@@ -1,6 +1,6 @@
 <div class="container my-4">
     <a href="<?= $router->generate('user-list'); ?>" class="btn btn-success float-right">Retour</a>
-    <h2>Ajouter un utilisateur</h2>
+    <h2><?= isset($mode) && $mode === 'create' ? 'Ajouter' : 'Modifier' ?> un utilisateur</h2>
 
     <?php include __DIR__ . '/../partials/errorlist.tpl.php'; ?>
 
@@ -13,7 +13,7 @@
                 class="form-control"
                 id="firstname" name="firstname"
                 placeholder="Prénom de l'utilisateur"
-                value="<?= isset($errorUser) ? $errorUser->getFirstname() : ''; ?>">
+                value="<?= isset($user) ? $user->getFirstname() : ''; ?>">
         </div>
 
         <div class="form-group">
@@ -23,7 +23,7 @@
                 class="form-control"
                 id="lastname" name="lastname"
                 placeholder="Nom de l'utilisateur"
-                value="<?= isset($errorUser) ? $errorUser->getLastname() : ''; ?>">
+                value="<?= isset($user) ? $user->getLastname() : ''; ?>">
         </div>
 
         <div class="form-group">
@@ -33,43 +33,51 @@
                 class="form-control"
                 id="email" name="email"
                 placeholder="Email de l'utilisateur"
-                value="<?= isset($errorUser) ? $errorUser->getEmail() : ''; ?>">
+                value="<?= isset($user) ? $user->getEmail() : ''; ?>">
         </div>
 
-        <div class="form-group">
-            <label for="password">Mot de passe</label>
-            <input
-                type="password"
-                class="form-control"
-                id="password" name="password"
-                placeholder="Mot de passe de l'utilisateur">
-        </div>
+        
+        <?php 
+            // On affiche les inputs password et conf_password que si l'on est en mode create
+            if (isset($mode) && $mode === 'create') : 
+        ?>
 
-        <div class="form-group">
-            <label for="conf_password">Confirmation du mot de passe</label>
-            <input
-                type="password"
-                class="form-control"
-                id="conf_password" name="conf_password"
-                placeholder="Confirmation du mot de passe de l'utilisateur">
-        </div>
+            <div class="form-group">
+                <label for="password">Mot de passe</label>
+                <input
+                    type="password"
+                    class="form-control"
+                    id="password" name="password"
+                    placeholder="Mot de passe de l'utilisateur">
+            </div>
+
+            <div class="form-group">
+                <label for="conf_password">Confirmation du mot de passe</label>
+                <input
+                    type="password"
+                    class="form-control"
+                    id="conf_password" name="conf_password"
+                    placeholder="Confirmation du mot de passe de l'utilisateur">
+            </div>
+
+        <?php endif ?>
 
         <div class="form-group">
             <label for="role">Rôle de l'utilisateur</label>
             <select id="role" name="role" class="form-control">
                 <option
                     disabled
-                    <?= !isset($errorUser) ? 'selected' : ''; ?>>
+                    <?= !isset($user) ? 'selected' : ''; ?>>
                         Merci de selectionner un rôle
                 </option>
                 <option
                     value="admin"
-                    <?= isset($errorUser) && $errorUser->getRole() == 'admin' ? 'selected' : ''; ?>>
+                    <?= isset($user) && $user->getRole() == 'admin' ? 'selected' : ''; ?>>
                         Rôle Administrateur
                 </option>
                 <option
                     value="catalog-manager"
-                    <?= isset($errorUser) && $errorUser->getRole() == 'catalog-manager' ? 'selected' : ''; ?>>
+                    <?= isset($user) && $user->getRole() == 'catalog-manager' ? 'selected' : ''; ?>>
                         Rôle catalogue manager
                 </option>
             </select>
@@ -80,17 +88,17 @@
             <select id="status" name="status" class="form-control">
                 <option
                     disabled
-                    <?= !isset($errorUser) ? 'selected' : ''; ?>>
+                    <?= !isset($user) ? 'selected' : ''; ?>>
                         Merci de selectionner un status
                 </option>
                 <option
                     value="1"
-                    <?= isset($errorUser) && $errorUser->getStatus() == '1' ? 'selected' : ''; ?>>
+                    <?= isset($user) && $user->getStatus() == '1' ? 'selected' : ''; ?>>
                         Actif
                 </option>
                 <option
                     value="2"
-                    <?= isset($errorUser) && $errorUser->getStatus() == '2' ? 'selected' : ''; ?>>
+                    <?= isset($user) && $user->getStatus() == '2' ? 'selected' : ''; ?>>
                         Bloqué
                 </option>
             </select>

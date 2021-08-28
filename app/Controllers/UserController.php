@@ -4,7 +4,8 @@ namespace App\Controllers;
 
 use App\Models\AppUser;
 
-class UserController extends CoreController {
+class UserController extends CoreController
+{
 
     public function login()
     {
@@ -13,6 +14,8 @@ class UserController extends CoreController {
 
     public function checkLogin()
     {
+
+        // On récupère les valeurs entrées dans le formulaire et on les filtre
         $email = filter_input(INPUT_POST, 'email', FILTER_SANITIZE_EMAIL);
         $password = filter_input(INPUT_POST, 'password', FILTER_SANITIZE_STRING);
 
@@ -32,21 +35,30 @@ class UserController extends CoreController {
             // qui à l'email spécifié
             $user = AppUser::findByEmail($email);
 
+            // dd(password_hash($password, PASSWORD_DEFAULT));
+            // dd(gettype($user->getStatus()));
+
             // L'utilisateur n'existe pas
             if ($user === false) {
 
-                $errorList[] = 'Utilisateur ou mot de passe incorrect';
+                $errorList[] = 'Utilisateur n\'existe pas';
 
-            // Là je sais que mon utilisateur est bien présent en base
+                // Là je sais que mon utilisateur est bien présent en base
             } else {
 
                 // Je compare le mot de passe de l'utilisateur en base
                 // avec le mot de passe saisi dans le formulaire
                 if (!password_verify($password, $user->getPassword())) {
 
-                    $errorList[] = 'Utilisateur ou mot de passe incorrect';
+                    $errorList[] = 'Mot de passe incorrect';
 
-                // Si les mot de passe correspondent
+                    // Si les mot de passe correspondent
+
+                // Je vérifie que le compte de l'utilisateur ne soit pas suspendu
+                } else if ($user->getStatus() !== '1') {
+
+                    $errorList[] = 'Votre compte est actuellement suspendu';
+
                 } else {
 
                     // Je retient en session l'id de l'utilisateur connecté
@@ -54,13 +66,14 @@ class UserController extends CoreController {
 
                     global $router;
 
-                    header('Location: '.$router->generate('main-home'));
+                    header('Location: ' . $router->generate('main-home'));
                 }
             }
         }
 
         // Si j'arrive ici dans mon code c'est qu'il y a eu un soucis:
         // email qui n'existe pas
+        // compte utilisateur suspendu
         // mot de passe incorrect
 
         // Du coup je prépare l'affichage du formulaire avec les messages d'erreurs.
@@ -83,7 +96,7 @@ class UserController extends CoreController {
 
         global $router;
 
-        header('Location: '.$router->generate('user-login'));
+        header('Location: ' . $router->generate('user-login'));
     }
 
     public function list()
@@ -97,16 +110,72 @@ class UserController extends CoreController {
         ]);
     }
 
+    /**
+     * Méthode s'occupant d'afficher le formulaire d'ajout d'un nouvel utilisateur
+     *
+     * @return void
+     */
     public function add()
     {
-        $this->show('user/add');
+        $this->show('user/create-update', [
+            'mode' => 'create'
+        ]);
     }
 
-    public function create()
+    public function update($user_id)
     {
+        // Récupération de l'id de l'utilisateur passé dans l'url
+        $user = AppUser::find($user_id);
+
+        // SI le user n'existe pas en base...
+        if (empty($user)) {
+
+            // On envoie le header 404
+            header('HTTP/1.0 404 Not Found');
+
+            // Puis on gère l'affichage
+            return $this->show('error/err404');
+        }
+
+        $this->show('user/create-update', [
+            'user' => $user,
+            'mode' => 'update'
+        ]);
+    }
+
+    public function createEdit($user_id = null)
+    {
+        // Si on ne m'a pas fourni d'id user
+        if (is_null($user_id)) {
+            // C'est que l'on souhaite créer un nouveau user
+            $mode = 'create';
+        } else {
+            // C'est que l'on souhaite modifier un user
+            $mode = 'update';
+
+            // Récupération du user dont l'id est passé dans l'url
+            $user = AppUser::find($user_id);
+
+            // Si le user n'existe pas en base
+            if (empty($user)) {
+
+                // On envoie le header 404
+                header('HTTP/1.0 404 Not Found');
+
+                // Puis on gère l'affichage
+                return $this->show('error/err404');
+            }
+        }
+
         $email = filter_input(INPUT_POST, 'email', FILTER_SANITIZE_EMAIL);
-        $password = filter_input(INPUT_POST, 'password', FILTER_SANITIZE_STRING);
-        $conf_password = filter_input(INPUT_POST, 'conf_password', FILTER_SANITIZE_STRING);
+
+        // On ne récupère les valeurs des inputs password et conf_password que si l'on 
+        // est mode create
+        if ($mode === 'create') {
+            $password = filter_input(INPUT_POST, 'password', FILTER_SANITIZE_STRING);
+            $conf_password = filter_input(INPUT_POST, 'conf_password', FILTER_SANITIZE_STRING);
+        }
+
         $firstname = filter_input(INPUT_POST, 'firstname', FILTER_SANITIZE_STRING);
         $lastname = filter_input(INPUT_POST, 'lastname', FILTER_SANITIZE_STRING);
         $role = filter_input(INPUT_POST, 'role', FILTER_SANITIZE_STRING);
@@ -115,7 +184,7 @@ class UserController extends CoreController {
         // Pour le moment, je n'ai pas d'erreurs
         $errorList = [];
 
-        if(empty($email)) {
+        if (empty($email)) {
 
             $errorList[] = 'Merci de renseigner l\'email';
         }
@@ -126,91 +195,95 @@ class UserController extends CoreController {
             $errorList[] = 'Adresse email incorrecte';
         }
 
-        if(empty($password)) {
+        // On ne vérifie les valeurs des inputs password et conf_password que si l'on 
+        // est mode create
+        if ($mode === 'create') {
+            if (empty($password)) {
 
-            $errorList[] = 'Merci de renseigner le mot de passe';
-        }
-
-        if (strlen($password) < 8) {
-
-            $errorList[] = 'Le mot de passe doit contenir au moins 8 caractères';
-        }
-
-        $nbr_minuscule = 0;
-        $nbr_majuscule = 0;
-        $nbr_chiffre = 0;
-        $nbr_spechar = 0;
-
-        // Je parcour chaque caractères de mon mot de pase pour le tester
-        for ($caractere_num = 0; $caractere_num < strlen($password); $caractere_num++) {
-
-            // Je cible chaque caractère l'un après l'autre
-            $testedChar = $password[$caractere_num];
-
-            // Si c'est un entier
-            if (is_numeric($testedChar)) {
-
-                $nbr_chiffre++;
-
-                // Je passe à l'itération suivante (en gros je continue ma boucle)
-                continue;
+                $errorList[] = 'Merci de renseigner le mot de passe';
             }
 
-            // Si mon caractère est dans la liste des caractères spéciaux autorisé
-            if (in_array($testedChar, ['_', '-', '|', '%', '&', ' ', '*', '=']))  {
+            if (strlen($password) < 8) {
 
-                $nbr_spechar++;
-                continue;
+                $errorList[] = 'Le mot de passe doit contenir au moins 8 caractères';
             }
 
-            // Si mon caractères en minuscule est toujours le même
-            // c'est qu'il était déjà en minuscule
-            if (strtolower($testedChar) == $testedChar) {
+            $nbr_minuscule = 0;
+            $nbr_majuscule = 0;
+            $nbr_chiffre = 0;
+            $nbr_spechar = 0;
 
-                $nbr_minuscule++;
-                continue;
+            // Je parcour chaque caractères de mon mot de passe pour le tester
+            for ($caractere_num = 0; $caractere_num < strlen($password); $caractere_num++) {
+
+                // Je cible chaque caractère l'un après l'autre
+                $testedChar = $password[$caractere_num];
+
+                // Si c'est un entier
+                if (is_numeric($testedChar)) {
+
+                    $nbr_chiffre++;
+
+                    // Je passe à l'itération suivante (en gros je continue ma boucle)
+                    continue;
+                }
+
+                // Si mon caractère est dans la liste des caractères spéciaux autorisé
+                if (in_array($testedChar, ['_', '-', '|', '%', '&', ' ', '*', '='])) {
+
+                    $nbr_spechar++;
+                    continue;
+                }
+
+                // Si mon caractères en minuscule est toujours le même
+                // c'est qu'il était déjà en minuscule
+                if (strtolower($testedChar) == $testedChar) {
+
+                    $nbr_minuscule++;
+                    continue;
+                }
+
+                // Si mon caractères en majuscule est toujours le même
+                // c'est qu'il était déjà en majuscule
+                if (strtoupper($testedChar) == $testedChar) {
+
+                    $nbr_majuscule++;
+                    continue;
+                }
             }
 
-            // Si mon caractères en majuscule est toujours le même
-            // c'est qu'il était déjà en majuscule
-            if (strtoupper($testedChar) == $testedChar) {
+            if (
+                $nbr_minuscule == 0
+                || $nbr_majuscule == 0
+                || $nbr_chiffre == 0
+                || $nbr_spechar == 0
+            ) {
 
-                $nbr_majuscule++;
-                continue;
+                $errorList[] = 'Le mot de passe doit contenir au moins 1entier, 1 lettre en majuscule, 1 lettre en minuscule, 1 caractères spécial';
+            }
+
+            if (empty($conf_password)) {
+
+                $errorList[] = 'Merci de renseigner la confirmation du mot de passe';
+            }
+
+            if ($password !== $conf_password) {
+
+                $errorList[] = 'Les mot de passe ne correspondent pas';
             }
         }
 
-        if (
-            $nbr_minuscule == 0
-            || $nbr_majuscule == 0
-            || $nbr_chiffre == 0
-            || $nbr_spechar == 0
-        ) {
-
-            $errorList[] = 'Le mot de passe doit contenir au moins 1entier, 1 lettre en majuscule, 1 lettre en minuscule, 1 caractères spécial';
-        }
-
-        if(empty($conf_password)) {
-
-            $errorList[] = 'Merci de renseigner la confirmation du mot de passe';
-        }
-
-        if ($password !== $conf_password) {
-
-            $errorList[] = 'Les mot de passe ne correspondent pas';
-        }
-
-        if(empty($firstname)) {
+        if (empty($firstname)) {
 
             $errorList[] = 'Merci de renseigner le prénom de l\'utilisateur';
         }
 
-        if(empty($lastname)) {
+        if (empty($lastname)) {
 
             $errorList[] = 'Merci de renseigner le nom de l\'utilisateur';
         }
 
-        if(empty($role)) {
+        if (empty($role)) {
 
             $errorList[] = 'Merci de selectionner un rôle';
         }
@@ -220,7 +293,7 @@ class UserController extends CoreController {
             $errorList[] = 'Rôle inconnu';
         }
 
-        if(empty($status)) {
+        if (empty($status)) {
 
             $errorList[] = 'Merci de selectionner un status';
         }
@@ -233,27 +306,34 @@ class UserController extends CoreController {
         // Si jusque là je n'ai pas d'erreur...
         if (empty($errorList)) {
 
-            // Je créé un nouvel utilisateur vide
-            $newUser = new AppUser();
+            // Si on est en mode création
+            if ($mode == 'create') {
 
-            $newUser->setEmail($email);
-            $newUser->setPassword($password);
-            $newUser->setFirstname($firstname);
-            $newUser->setLastname($lastname);
-            $newUser->setRole($role);
-            $newUser->setStatus($status);
+                // On instancie un nouveau user
+                $user = new AppUser();
+            }
 
-            // Je demande à mon model de s'enregistrer en BDD
-            $saved = $newUser->save();
+            $user->setEmail($email);
+
+            if ($mode === 'create') {
+                $user->setPassword($password);
+            }
+
+            $user->setFirstname($firstname);
+            $user->setLastname($lastname);
+            $user->setRole($role);
+            $user->setStatus($status);
+
+            // On insère ou on met à jour le user via la méthode save qui permettra de sélectionner la méthode appropriée
+            $saved = $user->save();
 
             if ($saved) {
 
                 global $router;
 
-                header('Location: '.$router->generate('user-list'));
+                header('Location: ' . $router->generate('user-list'));
 
                 return;
-
             } else {
 
                 $errorList[] = 'Une erreur est survenue, merci de reessayer';
@@ -264,19 +344,24 @@ class UserController extends CoreController {
         if (!empty($errorList)) {
 
             // Je créé mon utilisateur en erreur
-            $errorUser = new AppUser();
+            $user = new AppUser();
 
             // Je lui fourni les données en provenance direct du POST (sans filtre)
-            $errorUser->setEmail(filter_input(INPUT_POST, 'email'));
-            $errorUser->setPassword(filter_input(INPUT_POST, 'password'));
-            $errorUser->setFirstname(filter_input(INPUT_POST, 'firstname'));
-            $errorUser->setLastname(filter_input(INPUT_POST, 'lastname'));
-            $errorUser->setRole(filter_input(INPUT_POST, 'role'));
-            $errorUser->setStatus(filter_input(INPUT_POST, 'status'));
+            $user->setEmail(filter_input(INPUT_POST, 'email'));
 
-            $this->show('user/add', [
+            if ($mode === 'create') {
+                $user->setPassword(filter_input(INPUT_POST, 'password'));
+            }
+
+            $user->setFirstname(filter_input(INPUT_POST, 'firstname'));
+            $user->setLastname(filter_input(INPUT_POST, 'lastname'));
+            $user->setRole(filter_input(INPUT_POST, 'role'));
+            $user->setStatus(filter_input(INPUT_POST, 'status'));
+
+            $this->show('user/create-update', [
                 'errorList' => $errorList,
-                'errorUser' => $errorUser
+                'errorUser' => $user,
+                'mode'      => $mode
             ]);
         }
     }
@@ -301,6 +386,6 @@ class UserController extends CoreController {
         global $router;
 
         // A partir là je vais indiquer à mon navigateur d'aller sur cette URL là
-        header('Location: '.$router->generate('user-list'));
+        header('Location: ' . $router->generate('user-list'));
     }
 }

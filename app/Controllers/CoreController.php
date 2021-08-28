@@ -22,14 +22,13 @@ abstract class CoreController
         // La variable $match, contient les infos sur la route courante
         global $match;
 
-        // dd($match);
         // On récupere le nom de la route courante
         $routeName = $match['name'];
 
-        // Je vérifie les ACL
+        // On vérifie les ACL
         $this->checkAcl($routeName);
 
-        // Je vérifie les token
+        // On vérifie les token
         $this->checkCSRF($routeName);
     }
 
@@ -54,6 +53,7 @@ abstract class CoreController
 
             // Alors on récupère l'utilisateur connecté
             $user = AppUser::find($_SESSION['connectedUser']);
+            
 
             $viewVars['connectedUser'] = $user;
 
@@ -175,7 +175,7 @@ abstract class CoreController
             'user-delete' => ['admin']
         ];
 
-        // Je commence par vérifier si la route à un ACL de défini
+        // Je commence par vérifier si la route a un ACL de défini
         if (array_key_exists($routeName, $acl)) {
 
             // Si c'est le cas, je récupere la liste des rôles associés
@@ -200,6 +200,7 @@ abstract class CoreController
 
         $csrfTokenToCheckInGet = [
             'category-delete',
+            'product-delete',
             // etc.
         ];
 

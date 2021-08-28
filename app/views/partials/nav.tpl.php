@@ -33,7 +33,10 @@
             <?php endif; ?>
 
             <li class="nav-item">
-                <a class="nav-link" href="<?= $router->generate('gestion-home') ?>">Sélections Accueil &amp; Footer</a>
+                <a class="nav-link" href="<?= $router->generate('gestion-home') ?>">Gestion page d'accueil</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="<?= $router->generate('user-logout') ?>">Logout</a>
             </li>
         </ul>
         <form class="form-inline my-2 my-lg-0">

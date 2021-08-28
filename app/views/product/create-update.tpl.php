@@ -1,5 +1,5 @@
 <div class="container my-4">
-    <a href="categories.html" class="btn btn-success float-right">Retour</a>
+    <a href="<?=$router->generate('product-list')?>" class="btn btn-success float-right">Retour</a>
     <h2><?= isset($mode) && $mode === 'create' ? 'Ajouter' : 'Modifier'; ?> un produit</h2>
 
     <?php include __DIR__ . '/../partials/errorlist.tpl.php'; ?>

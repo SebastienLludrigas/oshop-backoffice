@@ -211,9 +211,27 @@ $router->map(
     '/user/add',
     [
         'controller' => 'UserController',
-        'method' => 'create'
+        'method' => 'createEdit'
     ],
     'user-add-post'
+);
+$router->map(
+    'GET',
+    '/user/update/[i:user_id]',
+    [
+        'controller' => 'UserController',
+        'method' => 'update'
+    ],
+    'user-update'
+);
+$router->map(
+    'POST',
+    '/user/update/[i:user_id]',
+    [
+        'controller' => 'UserController',
+        'method' => 'createEdit'
+    ],
+    'user-update-post'
 );
 $router->map(
     'GET',

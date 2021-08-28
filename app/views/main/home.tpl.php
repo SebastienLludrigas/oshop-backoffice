@@ -31,7 +31,7 @@
                         <i class="fa fa-trash-o" aria-hidden="true"></i>
                       </button>
                       <div class="dropdown-menu">
-                        <a class="dropdown-item" href="#">Oui, je veux supprimer</a>
+                        <a class="dropdown-item" href="<?= $router->generate('category-delete', ['category_id' => $categ->getId()]) ?>?token=<?= $token ?>">Oui, je veux supprimer</a>
                         <a class="dropdown-item" href="#" data-toggle="dropdown">Oups !</a>
                       </div>
                     </div>
@@ -72,7 +72,7 @@
                         <i class="fa fa-trash-o" aria-hidden="true"></i>
                       </button>
                       <div class="dropdown-menu">
-                        <a class="dropdown-item" href="#">Oui, je veux supprimer</a>
+                        <a class="dropdown-item" href="<?= $router->generate('product-delete', ['product_id' => $product->getId()]) ?>?token=<?= $token ?>">Oui, je veux supprimer</a>
                         <a class="dropdown-item" href="#" data-toggle="dropdown">Oups !</a>
                       </div>
                     </div>

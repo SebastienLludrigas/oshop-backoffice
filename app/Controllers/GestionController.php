@@ -26,8 +26,11 @@ class GestionController extends CoreController
 
         // Je récupere tout les emplacements selectionné
         // c'est un tableau sous la forme
-        // index (= emplacement - 1) => id de la catégorie associée
+        // index (= emplacement - 1 car l'emplacement commence à 1 et l'index d'un tableau à 0) la value 
+        // est l'id de la catégorie associée
         $allEmplacements = $_POST['emplacement'];
+
+        // dd($_POST['emplacement']);
 
         // Si je n'ai pas 5 emplacements c'est qu'il y a un soucis...
         if (count($allEmplacements) != 5) {
@@ -41,6 +44,9 @@ class GestionController extends CoreController
 
         foreach ($allEmplacements as $index => $value) {
 
+            // Si la value courante existe dans mon tableau temporaire cela veut dire que j'ai au moins
+            // 2 values identiques dans la sélection de l'utilisateur, on renvoi donc à ce moment là un
+            // message d'erreurs indiquant la marche à suivre
             if (in_array($value, $tempArray)) {
 
                 $errorList[] = 'Merci de selectionner une catégorie différente pour chaque emplacement';
@@ -86,9 +92,6 @@ class GestionController extends CoreController
                 // J'enregistre en base
                 $targetedCategory->save();
             }
-        }
-
-        if (empty($errorList)) {
 
             global $router;  
 
@@ -97,7 +100,10 @@ class GestionController extends CoreController
             return;
         }
 
-        // Je récupere toutes les categoriees en base
+        // Si $errorList n'est pas vide => j'arrive jusqu'à cette ligne de code car je n'ai pas rencontré 
+        // de return ou de break. 
+        // Je récupere toutes les categories en base et j'envoi le tableau des erreurs ainsi que 
+        // toutes les catégories pour remplir les selects dans les viewVars
         $allCategories = Category::findAll();
 
         $this->show('gestion/home', [

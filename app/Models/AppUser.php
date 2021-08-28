@@ -44,7 +44,7 @@ class AppUser extends CoreModel
 
         // Je fait la correspondance entre mes champs & les valeurs
         $pdoStatement->bindValue(':email', $this->email, PDO::PARAM_STR);
-        $pdoStatement->bindValue(':password', $this->password, PDO::PARAM_STR);
+        $test = $pdoStatement->bindValue(':password', $this->password, PDO::PARAM_STR);
         $pdoStatement->bindValue(':firstname', $this->firstname, PDO::PARAM_STR);
         $pdoStatement->bindValue(':lastname', $this->lastname, PDO::PARAM_STR);
         $pdoStatement->bindValue(':role', $this->role, PDO::PARAM_STR);

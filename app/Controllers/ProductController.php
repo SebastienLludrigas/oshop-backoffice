@@ -180,32 +180,7 @@ class ProductController extends CoreController {
             $product->setCategoryId($category_id);
             $product->setTypeId($type_id);
 
-            /*
-            // En mode de création, je vais un insert
-            if ($mode == 'create') {
-                // Maintenant que mon instance de la classe Product
-                // à bien des données dans ces propriétés
-                // Il ne me reste plus qu'a inserer le contenu dans la bonne table en BDD
-                $queryExecuted = $product->insert();
-
-            // En mode de modification, je vais faire un update
-            } else {
-
-                $queryExecuted = $product->update();
-            }
-            */
-
-            /*
-            Finalement le code au dessus n'est pas des plus pratique...
-            En effet il m'oblige dans mon controller (et donc pour chaque utilisation d'un model)
-            de devoir différencier la création d'une ligne en base de la modification.
-
-            Pour executer ->insert() ou bien ->update().
-
-            Il serait plus commode d'avoir pour chacun des models une méthode ->save()
-            dont le role serait d'executer ->insert() ou ->update() en fonction de la présence
-            ou non de la propriété id du dit model.
-            */
+            // On insère ou on met à jour le produit via la méthode save qui permettra de sélectionner la méthode appropriée
             $queryExecuted = $product->save();
 
             // Si tout c'est bien passé

@@ -6,10 +6,15 @@ use App\Models\AppUser;
 
 abstract class CoreController
 {
+    protected $router;
+
     // Je créé un constructeur sur mon CoreController
     // Ainsi il sera executé à chaque appel de controller héritant du CoreController
-    public function __construct()
+    public function __construct($router)
     {
+        // On récupère l'instanciation de AltoRouter depuis index.php
+        $this->router = $router;
+        
         // Tout ce que je vais écrire ici, sera executé automatiquement
         // pour chaque route de mon application
 
@@ -20,7 +25,7 @@ abstract class CoreController
         // Pour cela, je doit réaliser un listing... Autrement dit: un ACL
 
         // La variable $match, contient les infos sur la route courante
-        global $match;
+        $match = $this->router->match();
 
         // On récupere le nom de la route courante
         $routeName = $match['name'];
@@ -63,8 +68,9 @@ abstract class CoreController
             $viewVars['isAdmin'] = $user->getRole() == 'admin' ? true : false;
         }
 
-        // On globalise $router car on ne sait pas faire mieux pour l'instant
-        global $router;
+        // On récupère l'instanciation de AltoRouter dans $viewVars pour rendre ses informations
+        // disponibles dans toutes nos views
+        $viewVars['router'] = $this->router;
 
         // Comme $viewVars est déclarée comme paramètre de la méthode show()
         // les vues y ont accès

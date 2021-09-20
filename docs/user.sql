@@ -39,9 +39,10 @@ SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
 -- Data for table `app_user`
 -- -----------------------------------------------------
 START TRANSACTION;
-INSERT INTO `app_user` (`id`, `email`, `password`, `firstname`, `lastname`, `role`, `status`, `created_at`, `updated_at`) VALUES (1, 'philippe@oclock.io', 'rocknroll', 'Philippe', 'Candille', 'admin', 1, DEFAULT, NULL);
-INSERT INTO `app_user` (`id`, `email`, `password`, `firstname`, `lastname`, `role`, `status`, `created_at`, `updated_at`) VALUES (2, 'lucie@oclock.io', 'cameleon', 'Lucie', 'Copin', 'admin', 1, DEFAULT, NULL);
+INSERT INTO `app_user` (`id`, `email`, `password`, `firstname`, `lastname`, `role`, `status`, `created_at`, `updated_at`) VALUES (1, 'philippe@oclock.io', 'rocknroll', 'Philippe', 'Candille', 'catalog-manager', 1, DEFAULT, NULL);
+INSERT INTO `app_user` (`id`, `email`, `password`, `firstname`, `lastname`, `role`, `status`, `created_at`, `updated_at`) VALUES (2, 'lucie@oclock.io', 'cameleon', 'Lucie', 'Copin', 'catalog-manager', 1, DEFAULT, NULL);
 INSERT INTO `app_user` (`id`, `email`, `password`, `firstname`, `lastname`, `role`, `status`, `created_at`, `updated_at`) VALUES (3, 'nicole@oclock.io', 'onews', 'Nicole', 'Café', 'catalog-manager', 1, DEFAULT, NULL);
+INSERT INTO `app_user` (`id`, `email`, `password`, `firstname`, `lastname`, `role`, `status`, `created_at`, `updated_at`) VALUES (4, 'sebastienlludrigas@gmail.com', 'SkywalkerOshop06%', 'Sebastien', 'Lludrigas', 'admin', 1, DEFAULT, NULL);
 
 COMMIT;
 

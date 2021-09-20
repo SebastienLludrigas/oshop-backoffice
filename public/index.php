@@ -277,5 +277,9 @@ $dispatcher = new Dispatcher($match, '\App\Controllers\ErrorController::err404')
 // Je viens préciser le namespace pour tout mes controllers
 $dispatcher->setControllersNamespace('\App\Controllers\\');
 
+// Je passe à tous mes controllers la variable $router afin de pouvoir utiliser ses données dans
+// chaque views sans avoir besoin de créer une variable globale dans mon CoreController
+$dispatcher->setControllersArguments($router);
+
 // Une fois le "dispatcher" configuré, on lance le dispatch qui va exécuter la méthode du controller
 $dispatcher->dispatch();
